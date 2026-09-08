@@ -1,8 +1,9 @@
 'use client';
-import {useEffect,useMemo,useRef,useState} from 'react';
+import {useEffect,useRef,useState} from 'react';
 import {Bean,Brew,BrewData,Pour,Recipe} from '@/lib/types';
 import {loadData,saveData} from '@/lib/storage';
-import {Coffee,BookOpen,FlaskConical,Plus,Heart,Play,Pause,Music,Search,Trash2,Save,Scale,ChevronRight,Timer,Bean as BeanIcon,X,Pencil} from 'lucide-react';
+import {getSupabase,isSupabaseConfigured} from '@/lib/supabase';
+import {Coffee,BookOpen,FlaskConical,Plus,Heart,Play,Pause,Music,Search,Trash2,Save,Scale,ChevronRight,Timer,Bean as BeanIcon,X,Pencil,LogOut,Cloud,CloudOff} from 'lucide-react';
 
 const uid=()=>Math.random().toString(36).slice(2,10);
 const methods=['Pour Over / Manual Brew','Espresso'];
@@ -45,20 +46,109 @@ const MixNote=({recipe,compact=false}:{recipe:Recipe;compact?:boolean})=>{
 };
 
 export default function Home(){
- const [data,setData]=useState<BrewData>({recipes:[],beans:[],brews:[]}); const [ready,setReady]=useState(false); const [tab,setTab]=useState('dashboard'); const [query,setQuery]=useState(''); const [editing,setEditing]=useState<Recipe|null>(null); const [selected,setSelected]=useState<Recipe|null>(null); const [scaleDose,setScaleDose]=useState(10); const [brewMode,setBrewMode]=useState<Recipe|null>(null); const [brewPickRecipe,setBrewPickRecipe]=useState<Recipe|null>(null); const [brewBeanId,setBrewBeanId]=useState(''); const [brewStart,setBrewStart]=useState<number|null>(null); const [seconds,setSeconds]=useState(0);
- useEffect(()=>{setData(loadData());setReady(true)},[]); useEffect(()=>{if(ready)saveData(data)},[data,ready]); useEffect(()=>{if(!brewStart)return;const i=setInterval(()=>setSeconds(Math.floor((Date.now()-brewStart)/1000)),250);return()=>clearInterval(i)},[brewStart]);
- const update=(d:BrewData)=>setData(d); const favorite=(r:Recipe)=>update({...data,recipes:data.recipes.map(x=>x.id===r.id?{...x,favorite:!x.favorite,status:!x.favorite?'Favorite':x.status==='Favorite'?'Tested':x.status}:x)});
- const filtered=useMemo(()=>data.recipes.filter(r=>(r.name+' '+r.method+' '+r.beanName).toLowerCase().includes(query.toLowerCase())),[data.recipes,query]);
+ const [data,setData]=useState<BrewData>({recipes:[],beans:[],brews:[]});
+ const [ready,setReady]=useState(false);
+ const [userId,setUserId]=useState<string|null>(null);
+ const [userEmail,setUserEmail]=useState('');
+ const [authReady,setAuthReady]=useState(false);
+ const [syncState,setSyncState]=useState<'idle'|'saving'|'saved'|'error'>('idle');
+ const [syncMessage,setSyncMessage]=useState('');
+ const [tab,setTab]=useState('dashboard');
+ const [query,setQuery]=useState('');
+ const [editing,setEditing]=useState<Recipe|null>(null);
+ const [selected,setSelected]=useState<Recipe|null>(null);
+ const [scaleDose,setScaleDose]=useState(10);
+ const [brewMode,setBrewMode]=useState<Recipe|null>(null);
+ const [brewPickRecipe,setBrewPickRecipe]=useState<Recipe|null>(null);
+ const [brewBeanId,setBrewBeanId]=useState('');
+ const [brewStart,setBrewStart]=useState<number|null>(null);
+ const [seconds,setSeconds]=useState(0);
+ const saveTimer=useRef<ReturnType<typeof setTimeout>|null>(null);
+ const firstCloudLoad=useRef(true);
+
+ useEffect(()=>{
+   if(!isSupabaseConfigured()){setAuthReady(true);return}
+   const supabase=getSupabase()!;
+   let active=true;
+
+   supabase.auth.getSession().then(({data:{session}})=>{
+     if(!active)return;
+     setUserId(session?.user.id??null);
+     setUserEmail(session?.user.email??'');
+     setAuthReady(true);
+   });
+
+   const {data:{subscription}}=supabase.auth.onAuthStateChange((_event,session)=>{
+     if(!active)return;
+     setUserId(session?.user.id??null);
+     setUserEmail(session?.user.email??'');
+     setAuthReady(true);
+     if(!session){
+       setReady(false);
+       setData({recipes:[],beans:[],brews:[]});
+     }
+   });
+
+   return()=>{active=false;subscription.unsubscribe()};
+ },[]);
+
+ useEffect(()=>{
+   if(!userId){setReady(false);return}
+   let cancelled=false;
+   setReady(false);
+   setSyncState('idle');
+   loadData(userId).then(result=>{
+     if(cancelled)return;
+     setData(result.data);
+     setReady(true);
+     firstCloudLoad.current=false;
+     setSyncState('saved');
+     setSyncMessage(result.migrated?'Local data migrated to Supabase.':'Synced with Supabase.');
+   }).catch(error=>{
+     if(cancelled)return;
+     console.error(error);
+     setSyncState('error');
+     setSyncMessage(error?.message||'Unable to load cloud data.');
+   });
+   return()=>{cancelled=true};
+ },[userId]);
+
+ useEffect(()=>{
+   if(!ready||!userId||firstCloudLoad.current)return;
+   if(saveTimer.current)clearTimeout(saveTimer.current);
+   setSyncState('saving');
+   saveTimer.current=setTimeout(()=>{
+     saveData(userId,data).then(()=>{
+       setSyncState('saved');
+       setSyncMessage('Saved to Supabase.');
+     }).catch(error=>{
+       console.error(error);
+       setSyncState('error');
+       setSyncMessage(error?.message||'Cloud save failed. Local backup is still kept.');
+     });
+   },650);
+   return()=>{if(saveTimer.current)clearTimeout(saveTimer.current)};
+ },[data,ready,userId]);
+
+ useEffect(()=>{if(!brewStart)return;const i=setInterval(()=>setSeconds(Math.floor((Date.now()-brewStart)/1000)),250);return()=>clearInterval(i)},[brewStart]);
+
+ if(!isSupabaseConfigured())return <SupabaseSetup/>;
+ if(!authReady)return <main className="shell"><div className="hero"><h1>BREW-NOTE.</h1><p>Connecting to Supabase…</p></div></main>;
+ if(!userId)return <AuthScreen/>;
+
+ const update=(d:BrewData)=>setData(d);
+ const favorite=(r:Recipe)=>update({...data,recipes:data.recipes.map(x=>x.id===r.id?{...x,favorite:!x.favorite,status:!x.favorite?'Favorite':x.status==='Favorite'?'Tested':x.status}:x)});
+ const filtered=data.recipes.filter(r=>(r.name+' '+r.method+' '+r.beanName).toLowerCase().includes(query.toLowerCase()));
  const todayKey=(()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`})();
  const coffeeToday=data.brews.filter(b=>b.entryType!=='note'&&b.date===todayKey).reduce((sum,b)=>sum+(Number(b.coffee)||0),0);
  const scaled=(r:Recipe,dose:number)=>{const factor=dose/r.coffee;return {...r,coffee:dose,water:Math.round(r.water*factor),pours:r.pours.map(p=>({...p,amount:Math.round(p.amount*factor)}))}};
  const saveRecipe=(r:Recipe)=>{const exists=data.recipes.some(x=>x.id===r.id);update({...data,recipes:exists?data.recipes.map(x=>x.id===r.id?r:x):[r,...data.recipes]});setEditing(null);setSelected(r);};
  const deleteRecipe=(id:string)=>{update({...data,recipes:data.recipes.filter(r=>r.id!==id)});setSelected(null)};
  const prepareBrew=(r:Recipe)=>{setEditing(null);setSelected(null);setBrewMode(null);setBrewBeanId('');setBrewPickRecipe(r)};
- if(!ready)return <main className="shell"><div className="hero"><h1>BREW-NOTE.</h1><p>Loading your coffee lab…</p></div></main>;
+ if(!ready)return <main className="shell"><div className="hero"><h1>BREW-NOTE.</h1><p>Loading your cloud coffee lab…</p>{syncState==='error'&&<p className="note">{syncMessage}</p>}</div></main>;
  return <main className="shell">
   <div className="brutalDecor" aria-hidden="true"><i className="geo geoSquare"></i><i className="geo geoCircle"></i><i className="geo geoTriangle"></i><i className="geo geoDots"></i><i className="geo geoCross"></i></div>
-  <header className="topbar"><div className="brand" onClick={()=>setTab('dashboard')}><Coffee className="brandIcon" size={38}/><div><b>BREW-NOTE v1.1</b><small>RUN. TASTE. TWEAK. REPEAT.</small></div></div><nav>{[['dashboard','LAB'],['recipes','RECIPES'],['beans','BEANS'],['journal','JOURNAL']].map(([id,l])=><button className={tab===id?'active':''} onClick={()=>setTab(id)} key={id}>{l}</button>)}</nav><LofiPlayer/></header>
+  <header className="topbar"><div className="brand" onClick={()=>setTab('dashboard')}><Coffee className="brandIcon" size={38}/><div><b>BREW-NOTE v3.0</b><small>RUN. TASTE. TWEAK. REPEAT.</small></div></div><nav>{[['dashboard','LAB'],['recipes','RECIPES'],['beans','BEANS'],['journal','JOURNAL']].map(([id,l])=><button className={tab===id?'active':''} onClick={()=>setTab(id)} key={id}>{l}</button>)}</nav><LofiPlayer/><div className={`cloudAccount ${syncState}`} title={syncMessage}>{syncState==='error'?<CloudOff size={17}/>:<Cloud size={17}/>}<span><b>{syncState==='saving'?'SYNCING…':syncState==='error'?'SYNC ERROR':'CLOUD SYNC'}</b><small>{userEmail}</small></span><button onClick={()=>getSupabase()?.auth.signOut()} aria-label="Sign out"><LogOut size={16}/></button></div></header>
   {tab==='dashboard'&&<section><div className="hero heroWithRunner"><div className="heroCopy"><p className="kicker">PERSONAL COFFEE LAB</p><h1>GOOD COFFEE IS<br/>DEBUGGING WITH BEANS.</h1><p>Run the brew. Taste the output. Tweak the variables. Repeat.</p><button className="primary" onClick={()=>{setEditing(emptyRecipe());setTab('recipes')}}><Plus/> ADD RECIPE</button></div><div className="runnerArt"><span className="speechSticker">GOOD IDEAS<br/>START WITH<br/>COFFEE.</span><img src="/running-cup.svg" alt="Running white coffee cup mascot"/></div><div className="heroMenuCards"><button className="heroMenu recipesMenu" onClick={()=>setTab('recipes')}><BookOpen size={38}/><span><b>RECIPES</b><small>Organize your brewing recipes.</small></span><ChevronRight/></button><button className="heroMenu beansMenu" onClick={()=>setTab('beans')}><BeanIcon size={38}/><span><b>BEANS</b><small>Track your beans and stock.</small></span><ChevronRight/></button><button className="heroMenu journalMenu" onClick={()=>setTab('journal')}><FlaskConical size={38}/><span><b>JOURNAL</b><small>Log brews and tasting notes.</small></span><ChevronRight/></button></div></div>
    <div className="stats"><DailyCoffeeStat grams={coffeeToday}/><Stat n={data.recipes.length} label="RECIPES" icon={<BookOpen/>}/><Stat n={data.brews.filter(b=>b.entryType!=='note').length} label="BREWS" icon={<FlaskConical/>}/><Stat n={data.beans.length} label="BEANS" icon={<BeanIcon/>}/><Stat n={data.recipes.filter(r=>r.favorite).length} label="FAVORITES" icon={<Heart/>}/></div>
    <div className="grid2"><div className="panel"><div className="panelHead"><h2>BREW AGAIN</h2><span>latest log</span></div>{data.brews[0]?<><h3>{data.brews[0].recipeName}</h3><p>{data.brews[0].beanName}</p><div className="miniSpecs"><b>{data.brews[0].coffee}g</b><b>{data.brews[0].water}g</b><b>{data.brews[0].temp}°C</b><b>★ {data.brews[0].rating}</b></div><button className="primary" onClick={()=>{const r=data.recipes.find(x=>x.id===data.brews[0].recipeId);if(r)prepareBrew(r)}}><Play/> BREW AGAIN</button></>:<p>No brew logs yet.</p>}</div>
@@ -92,8 +182,61 @@ export default function Home(){
 
   {brewMode&&<BrewMode recipe={brewMode} seconds={seconds} started={!!brewStart} start={()=>{setSeconds(0);setBrewStart(Date.now())}} stop={()=>{setBrewStart(null);setSeconds(0)}} close={()=>{setBrewMode(null);setBrewStart(null);setSeconds(0)}} save={(b)=>{update({...data,brews:[b,...data.brews],beans:data.beans.map(x=>x.name===b.beanName?{...x,stock:Math.max(0,x.stock-b.coffee)}:x)});setBrewMode(null);setBrewStart(null);setSeconds(0);setTab('journal')}}/>}
   <nav className="mobileDock" aria-label="Mobile navigation">{[['dashboard','LAB',<Coffee key="i1" size={20}/>],['recipes','RECIPES',<BookOpen key="i2" size={20}/>],['beans','BEANS',<BeanIcon key="i3" size={20}/>],['journal','JOURNAL',<FlaskConical key="i4" size={20}/>]].map(([id,label,icon]:any)=><button key={id} className={tab===id?'active':''} onClick={()=>setTab(id)}>{icon}<span>{label}</span></button>)}</nav>
-  <footer className="boxedFooter"><span>RUN. TASTE. TWEAK. REPEAT.</span><span className="creator">Created with <Coffee size={15}/> by gpsteam</span><span>BREW-NOTE v1.1</span></footer>
+  <footer className="boxedFooter"><span>RUN. TASTE. TWEAK. REPEAT.</span><span className="creator">Created with <Coffee size={15}/> by gpsteam</span><span>BREW-NOTE v3.0</span></footer>
  </main>
+}
+
+
+function SupabaseSetup(){
+ return <main className="authPage"><div className="authCard setupCard">
+  <p className="kicker">CLOUD SETUP REQUIRED</p>
+  <h1>CONNECT BREW-NOTE TO SUPABASE.</h1>
+  <p>Create a Supabase project, run <code>supabase/schema.sql</code>, then add these environment variables.</p>
+  <pre>NEXT_PUBLIC_SUPABASE_URL=...
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=...</pre>
+  <p className="note">Keep the service-role key private. Brew-Note only needs the public/publishable key because Row Level Security protects each user's data.</p>
+ </div></main>
+}
+
+function AuthScreen(){
+ const supabase=getSupabase()!;
+ const [mode,setMode]=useState<'signin'|'signup'>('signin');
+ const [email,setEmail]=useState('');
+ const [password,setPassword]=useState('');
+ const [busy,setBusy]=useState(false);
+ const [message,setMessage]=useState('');
+
+ const submit=async(e:React.FormEvent)=>{
+   e.preventDefault();
+   setBusy(true);setMessage('');
+   try{
+     if(mode==='signup'){
+       const {data,error}=await supabase.auth.signUp({email,password});
+       if(error)throw error;
+       setMessage(data.session?'Account created. Syncing Brew-Note…':'Account created. Check your email if confirmation is enabled in Supabase.');
+     }else{
+       const {error}=await supabase.auth.signInWithPassword({email,password});
+       if(error)throw error;
+     }
+   }catch(error:any){
+     setMessage(error?.message||'Authentication failed.');
+   }finally{
+     setBusy(false);
+   }
+ };
+
+ return <main className="authPage"><div className="authCard">
+  <div className="authBrand"><Coffee size={46}/><div><p className="kicker">BREW-NOTE v3.0</p><h1>YOUR BREWS.<br/>ONE CLOUD.</h1></div></div>
+  <p>Sign in on your laptop and phone with the same account. Recipes, beans and journals will stay in sync.</p>
+  <div className="authTabs"><button className={mode==='signin'?'active':''} onClick={()=>setMode('signin')}>SIGN IN</button><button className={mode==='signup'?'active':''} onClick={()=>setMode('signup')}>CREATE ACCOUNT</button></div>
+  <form onSubmit={submit}>
+   <Field label="EMAIL"><input type="email" autoComplete="email" required value={email} onChange={e=>setEmail(e.target.value)}/></Field>
+   <Field label="PASSWORD"><input type="password" autoComplete={mode==='signin'?'current-password':'new-password'} minLength={6} required value={password} onChange={e=>setPassword(e.target.value)}/></Field>
+   {message&&<p className="authMessage">{message}</p>}
+   <button className="primary authSubmit" disabled={busy}>{busy?'PLEASE WAIT…':mode==='signin'?'SIGN IN':'CREATE ACCOUNT'}</button>
+  </form>
+  <small className="authFoot">Your data is isolated by Supabase Row Level Security.</small>
+ </div></main>
 }
 
 function LofiPlayer(){

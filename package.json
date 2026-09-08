@@ -1,6 +1,6 @@
 {
   "name": "brew-note",
-  "version": "1.6.0",
+  "version": "3.0.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -12,7 +12,8 @@
     "next": "16.3.3",
     "react": "19.2.0",
     "react-dom": "19.2.0",
-    "lucide-react": "^0.468.0"
+    "lucide-react": "^0.468.0",
+    "@supabase/supabase-js": "^2.0.0"
   },
   "devDependencies": {
     "typescript": "^5.7.2",

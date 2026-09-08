@@ -510,3 +510,79 @@ body:has(.modal) .mobileDock{
 @media(max-width:650px){
   .selectedBeanFacts{grid-template-columns:repeat(2,1fr)}
 }
+
+
+/* V3.0 — Supabase Auth + Cloud Sync */
+.authPage{
+  min-height:100vh;
+  display:grid;
+  place-items:center;
+  padding:24px;
+  background:
+    radial-gradient(circle at 20px 20px, var(--ink) 2px, transparent 2.5px) 0 0/34px 34px,
+    var(--yellow);
+}
+.authCard{
+  width:min(560px,100%);
+  border:4px solid var(--ink);
+  background:var(--paper);
+  box-shadow:10px 10px 0 var(--ink);
+  padding:24px;
+}
+.authCard h1{font-size:clamp(38px,8vw,72px);line-height:.88;margin:6px 0 18px}
+.authBrand{display:flex;align-items:flex-start;gap:15px}
+.authTabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:20px 0 14px}
+.authTabs button{
+  border:3px solid var(--ink);
+  background:white;
+  font-weight:1000;
+  padding:12px;
+  cursor:pointer;
+}
+.authTabs button.active{background:var(--mint);box-shadow:4px 4px 0 var(--ink)}
+.authSubmit{width:100%;margin-top:12px;justify-content:center}
+.authMessage{border:2px solid var(--ink);background:var(--pink);padding:10px;font-weight:900}
+.authFoot{display:block;margin-top:15px;font-weight:800}
+.setupCard pre{
+  white-space:pre-wrap;
+  overflow-wrap:anywhere;
+  border:3px solid var(--ink);
+  background:#111;
+  color:#fff;
+  padding:14px;
+  font-size:12px;
+}
+.setupCard code{font-weight:1000}
+
+.cloudAccount{
+  display:grid;
+  grid-template-columns:auto minmax(120px,1fr) auto;
+  align-items:center;
+  gap:8px;
+  border:2px solid var(--ink);
+  background:var(--mint);
+  padding:6px 7px;
+  box-shadow:3px 3px 0 var(--ink);
+  min-width:210px;
+}
+.cloudAccount.saving{background:var(--yellow)}
+.cloudAccount.error{background:#ff9a8b}
+.cloudAccount span{display:flex;flex-direction:column;min-width:0}
+.cloudAccount b{font-size:9px}
+.cloudAccount small{font-size:7px;font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cloudAccount button{
+  border:2px solid var(--ink);
+  background:white;
+  width:31px;height:31px;
+  display:grid;place-items:center;
+  cursor:pointer;
+}
+
+@media(max-width:1050px){
+ .cloudAccount{order:4;width:100%}
+}
+@media(max-width:600px){
+ .authPage{padding:12px}
+ .authCard{padding:17px;box-shadow:6px 6px 0 var(--ink)}
+ .authBrand{flex-direction:column}
+}
