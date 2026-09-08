@@ -29,7 +29,10 @@ footer{background:transparent}
 
 /* Brew-Note V1.2 — geometric neo-brutalism + mobile dock */
 .shell{position:relative;isolation:isolate}
-.shell>header,.shell>section,.shell>footer,.shell>.modal,.shell>.brewOverlay,.mobileDock{position:relative;z-index:2}
+.shell>header,.shell>section,.shell>footer{position:relative;z-index:2}
+.shell>.modal{position:fixed;z-index:100}
+.shell>.brewOverlay{position:fixed;z-index:200}
+.mobileDock{z-index:90}
 .brutalDecor{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
 .geo{position:absolute;display:block;filter:none}
 .geoSquare{width:58px;height:58px;border:4px solid var(--ink);background:var(--lime);top:118px;right:5vw;transform:rotate(7deg);box-shadow:6px 6px 0 var(--ink)}
@@ -62,3 +65,7 @@ footer{background:transparent}
  .hero:after{width:88px;height:60px;right:12px;bottom:12px;opacity:.42}
  footer{margin-bottom:86px}
 }
+
+/* Brew-Note V1.3 — modal behavior fixes */
+.modal,.brewOverlay{animation:brutalPop .14s ease-out}
+@keyframes brutalPop{from{opacity:0;transform:scale(.985)}to{opacity:1;transform:scale(1)}}

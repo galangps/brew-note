@@ -68,3 +68,10 @@ V1 stores data in the current browser/device only. This is perfect for the first
 - Plain CSS (custom neo-brutalism design)
 - Lucide icons
 - Browser localStorage persistence
+
+
+## V1.3 UI fixes
+- Removed the demo-data reset action from the public UI.
+- Recipe Edit, Open, and Brew are mutually exclusive flows.
+- Recipe editor/detail and Brew Mode now render as true fixed overlays instead of extending the page.
+- Bean cards expose a single Edit action.

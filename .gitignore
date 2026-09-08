@@ -5,7 +5,3 @@ out
 .env.local
 .DS_Store
 npm-debug.log*
-node_modules
-.next
-.env
-.env.local
