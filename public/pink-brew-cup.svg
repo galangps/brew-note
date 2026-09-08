@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 440 390">
+<g stroke="#111" stroke-width="10" stroke-linecap="round" stroke-linejoin="round">
+  <!-- coffee splashes -->
+  <path d="M148 98c24-38 48-51 64-30 13 17-11 31 9 40 24 10 25-35 49-20 19 12-2 35 17 43 19 8 32-13 47 3 12 13-9 32-43 37z" fill="#7a3514"/>
+  <ellipse cx="124" cy="91" rx="12" ry="8" fill="#7a3514"/>
+  <ellipse cx="327" cy="99" rx="10" ry="14" fill="#7a3514"/>
+  <!-- cup -->
+  <path d="M120 139c10 115 32 182 113 182 78 0 111-61 124-182z" fill="#ff72b6"/>
+  <ellipse cx="238" cy="139" rx="119" ry="29" fill="#ff72b6"/>
+  <path d="M129 138c59 24 158 28 218 2" fill="none"/>
+  <path d="M142 137c54 17 138 20 195 3" stroke="#7a3514" stroke-width="22" fill="none"/>
+  <!-- handle -->
+  <path d="M350 168c61-5 77 72 27 99-21 11-38 5-50-10" fill="none" stroke="#ff72b6" stroke-width="28"/>
+  <path d="M350 168c61-5 77 72 27 99-21 11-38 5-50-10" fill="none"/>
+  <!-- face -->
+  <ellipse cx="193" cy="209" rx="23" ry="34" fill="#fff"/>
+  <ellipse cx="271" cy="209" rx="23" ry="34" fill="#fff"/>
+  <ellipse cx="199" cy="215" rx="10" ry="21" fill="#111" stroke="none"/>
+  <ellipse cx="277" cy="215" rx="10" ry="21" fill="#111" stroke="none"/>
+  <path d="M199 254c25 31 61 31 85 2-35 7-55 7-85-2z" fill="#111"/>
+  <path d="M222 276c13-13 31-15 44-5-12 14-29 17-44 5z" fill="#ff4b82" stroke-width="5"/>
+  <!-- thumbs-up arm -->
+  <path d="M123 195c-34 1-54 20-72 15" fill="none"/>
+  <path d="M54 211c-13-4-21-14-18-25 4-12 15-8 20 2-2-28 9-46 21-40 13 7 4 29 6 43 14-9 28-4 28 8 0 18-30 20-57 12z" fill="#ff72b6"/>
+  <!-- other arm -->
+  <path d="M346 225c25 9 39 22 54 39" fill="none"/>
+  <!-- legs and shoes -->
+  <path d="M196 319l-16 35M278 319l15 34" fill="none" stroke-width="15"/>
+  <path d="M153 347c23-13 44-7 59 11-15 18-49 23-73 11 0-9 5-17 14-22z" fill="#111"/>
+  <path d="M270 352c25-13 46-3 56 15-18 17-47 20-69 6 0-8 5-15 13-21z" fill="#111"/>
+  <path d="M151 359c15 5 33 4 47-3M273 364c15 4 29 3 40-3" stroke="#fff" stroke-width="6"/>
+</g>
+</svg>

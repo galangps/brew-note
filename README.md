@@ -48,7 +48,7 @@ Then in Vercel:
 
 V1 stores data in the current browser/device only. This is perfect for the first usable personal version, but data will **not sync between laptop and phone**. The code separates domain types and persistence (`lib/storage.ts`) so V2 can replace local storage with Supabase/Postgres/Prisma without rewriting the UI model.
 
-## Suggested V1.6 / V2 roadmap
+## Suggested V1.7 / V2 roadmap
 
 - Cloud database + authentication
 - Sync between devices
@@ -82,9 +82,26 @@ V1 stores data in the current browser/device only. This is perfect for the first
 - Mobile bean editor stacking bug fixed.
 - Header branding updated to BREW-NOTE v1.1 with a larger coffee icon.
 
-## V1.6 UX update
+## V1.7 UX update
 - Brew Mode now shows the upcoming brew steps below the current instruction.
 - Bean process and roast level use controlled dropdowns.
 - Recipe method, roast, and filter use controlled dropdowns; choosing a saved bean copies its origin/process/roast metadata.
 - Added a neo-brutalist coffee mascot artwork and matching coffee-cup favicon.
 - Footer is now a boxed neo-brutalist element.
+
+
+## V1.7
+- Clean transparent PNG mascots for hero and Brew Mode.
+- Simplified transparent coffee-cup favicon.
+- Improved mascot sizing on mobile.
+
+
+## V1.8
+- Re-cleaned both mascot PNGs from the original cutouts.
+- Removed residual frame/hairline artifacts while keeping transparent backgrounds.
+
+
+## V1.9
+- Replaced both raster mascots with true transparent SVG artwork for clean desktop/mobile scaling.
+- Added original procedural 2D-game-style lo-fi music with play/pause.
+- Audio attempts to autoplay; browsers that block audible autoplay start it on the first user interaction.

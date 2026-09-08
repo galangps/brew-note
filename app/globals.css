@@ -125,3 +125,139 @@ footer{background:transparent}
 .progressInstruction{width:min(760px,100%);text-align:left}.instructionTitle{display:flex;justify-content:space-between;gap:18px;align-items:center}.instructionTitle>span{font-weight:1000;white-space:nowrap}.progressInstruction h2{margin:4px 0}.stepProgress{position:relative;height:22px;border:3px solid var(--ink);background:#fffdf8;margin-top:16px;overflow:visible}.stepProgressFill{height:100%;background:var(--mint);transition:width .25s linear}.progressMarker{position:absolute;top:50%;width:27px;height:27px;border-radius:50%;background:var(--yellow);border:3px solid var(--ink);transform:translate(-50%,-50%);box-shadow:2px 2px 0 var(--ink);transition:left .25s linear}
 .brewTimeline{position:relative;width:min(900px,100%);display:grid;grid-template-columns:repeat(var(--steps,5),1fr);grid-auto-flow:column;gap:12px;margin:28px 0 8px;padding-top:4px}.brewTimelineStep{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:4px;min-width:88px}.brewTimelineStep>span{width:39px;height:39px;border:3px solid var(--ink);border-radius:50%;display:grid;place-items:center;background:#fffdf8;font-weight:1000;box-shadow:3px 3px 0 var(--ink)}.brewTimelineStep.current>span{background:var(--cyan);transform:scale(1.08)}.brewTimelineStep.done>span{background:var(--mint)}.brewTimelineStep b{font-size:12px}.brewTimelineStep small{font-size:10px}.timelineRail{position:absolute;left:4%;right:4%;top:23px;height:6px;background:#fffdf8;border:2px solid var(--ink);z-index:1;overflow:hidden}.timelineRail i{display:block;height:100%;background:var(--pink);transition:width .25s linear}
 @media(max-width:850px){.heroWithRunner{grid-template-columns:1fr;padding:20px}.runnerArt{min-height:240px}.runnerArt img{width:min(88vw,360px)}.speechSticker{right:4px;top:0;font-size:11px}.heroMenuCards{grid-template-columns:1fr;gap:12px}.heroMenu{padding:14px}.brewStage{grid-template-columns:1fr}.pinkCupArt{min-height:155px;margin-top:-18px}.pinkCupArt img{width:170px}.niceBrew{width:68px;height:68px;font-size:11px;right:12%}.instructionTitle{align-items:flex-start}.brewTimeline{overflow-x:auto;justify-content:flex-start;grid-template-columns:none;grid-auto-columns:100px;padding:8px 2px 12px}.timelineRail{left:48px;right:48px}.brewTimelineStep{min-width:96px}.brewOverlay h1{margin-bottom:4px}.timer{font-size:clamp(68px,23vw,110px)}.progressInstruction{margin-top:6px}}
+
+
+/* V1.7 — transparent mascot polish */
+.heroMascot,
+.brewMascot,
+.heroMascot img,
+.brewMascot img {
+  background: transparent !important;
+}
+
+.heroMascot img,
+.brewMascot img {
+  object-fit: contain;
+  object-position: center;
+  filter: none;
+}
+
+.heroMascot {
+  overflow: visible !important;
+}
+
+.brewMascot {
+  overflow: visible !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+@media (max-width: 720px) {
+  .heroMascot {
+    width: min(78vw, 360px) !important;
+    margin: 10px auto 4px !important;
+    min-height: 0 !important;
+  }
+
+  .heroMascot img {
+    width: 100% !important;
+    height: auto !important;
+    max-height: 390px !important;
+  }
+
+  .brewMascot {
+    width: 112px !important;
+    height: 112px !important;
+    right: 14px !important;
+    top: 142px !important;
+  }
+
+  .brewMascot img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: contain !important;
+  }
+}
+
+
+/* V1.8 — mascot assets are true transparent cutouts */
+.heroMascot,
+.brewMascot,
+.heroMascot img,
+.brewMascot img {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+.heroMascot img,
+.brewMascot img {
+  display: block;
+  object-fit: contain !important;
+  object-position: center !important;
+}
+
+
+/* V1.9 — crisp transparent SVG mascots + lofi controls */
+.runnerArt img,
+.pinkCupArt img{
+  background:transparent !important;
+  border:0 !important;
+  box-shadow:none !important;
+  filter:none !important;
+  object-fit:contain !important;
+  object-position:center !important;
+}
+
+.runnerArt{
+  overflow:visible !important;
+  min-width:0;
+}
+.runnerArt img{
+  width:min(100%,430px);
+  max-height:420px;
+}
+.pinkCupArt{
+  overflow:visible !important;
+  min-width:0;
+}
+.pinkCupArt img{
+  width:min(100%,245px);
+  max-height:250px;
+}
+
+.lofiPlayer{
+  display:grid;
+  grid-template-columns:auto 1fr auto;
+  align-items:center;
+  gap:8px;
+  min-width:205px;
+  border:2px solid var(--ink);
+  background:var(--pink);
+  box-shadow:3px 3px 0 var(--ink);
+  padding:7px 8px;
+}
+.lofiCopy{display:flex;flex-direction:column;line-height:1.05}
+.lofiCopy b{font-size:11px}
+.lofiCopy small{font-size:8px;font-weight:800}
+.lofiPlayer button{
+  width:34px;height:34px;padding:0;
+  display:grid;place-items:center;
+  border:2px solid var(--ink);
+  background:var(--white);
+  cursor:pointer;
+}
+.lofiPlayer.playing button{background:var(--mint)}
+
+@media(max-width:1050px){
+  .topbar{flex-wrap:wrap}
+  .lofiPlayer{order:3;width:100%}
+}
+@media(max-width:850px){
+  .runnerArt{min-height:0 !important;padding:6px 0 0}
+  .runnerArt img{width:min(74vw,330px) !important;max-height:330px !important;margin:auto}
+  .speechSticker{right:5%;top:3%}
+  .pinkCupArt{min-height:0 !important;margin:0 auto !important;height:150px}
+  .pinkCupArt img{width:150px !important;height:150px !important;max-height:none !important}
+  .niceBrew{right:3% !important;top:-6px !important}
+}
