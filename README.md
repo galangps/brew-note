@@ -48,7 +48,7 @@ Then in Vercel:
 
 V1 stores data in the current browser/device only. This is perfect for the first usable personal version, but data will **not sync between laptop and phone**. The code separates domain types and persistence (`lib/storage.ts`) so V2 can replace local storage with Supabase/Postgres/Prisma without rewriting the UI model.
 
-## Suggested V1.5 / V2 roadmap
+## Suggested V1.6 / V2 roadmap
 
 - Cloud database + authentication
 - Sync between devices
@@ -82,7 +82,7 @@ V1 stores data in the current browser/device only. This is perfect for the first
 - Mobile bean editor stacking bug fixed.
 - Header branding updated to BREW-NOTE v1.1 with a larger coffee icon.
 
-## V1.5 UX update
+## V1.6 UX update
 - Brew Mode now shows the upcoming brew steps below the current instruction.
 - Bean process and roast level use controlled dropdowns.
 - Recipe method, roast, and filter use controlled dropdowns; choosing a saved bean copies its origin/process/roast metadata.
