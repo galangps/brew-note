@@ -105,3 +105,27 @@ V1 stores data in the current browser/device only. This is perfect for the first
 - Replaced both raster mascots with true transparent SVG artwork for clean desktop/mobile scaling.
 - Added original procedural 2D-game-style lo-fi music with play/pause.
 - Audio attempts to autoplay; browsers that block audible autoplay start it on the first user interaction.
+
+## V2.0
+- Iced recipe mode with ice at the beginning, end, or both.
+- Ice steps live inside POUR STEP and scale with recipe dose.
+- Brew detail / Brew Mode show brew-water vs ice summary.
+- Bean library adds Roastery and Bean Type (Arabica, Robusta, Excelsa).
+- Grinder presets with Other Grinders support.
+- Pour labels and pour techniques converted to dropdowns.
+- Hario Switch Dripper support with explicit OPEN/CLOSE switch steps:
+  CLOSE = immersion, OPEN = percolation.
+
+## V2.1
+- Removed the separate Iced Recipe configuration box.
+- Added `+ ADD ICE` beside `+ ADD POUR` and `+ ADD SWITCH ACTION`.
+- Ice is now a normal brew-sequence step and can be moved anywhere using ↑ / ↓ controls.
+- Recipe cards, dashboard Recent Recipes, recipe detail, and Brew Mode show:
+  Liquid, Ice, Liquid:Ice, final ratio, and total beverage water.
+- Lo-fi player changed to an original 90s arcade-fighter-inspired loop.
+  It intentionally does not reproduce any copyrighted game soundtrack or melody.
+
+## V2.2
+- Removed the compact Liquid / Ice / Ratio strip from recipe cards.
+- Removed Recent Recipes from the LAB dashboard for a cleaner landing page.
+- Footer credit changed to `Created with ☕ by gpsteam`.
