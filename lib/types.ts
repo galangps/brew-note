@@ -1,5 +1,5 @@
 export type Pour={id:string;label:string;start:string;amount:number;mode:'add'|'cumulative';technique:string;notes?:string};
 export type Recipe={id:string;name:string;method:string;beanId?:string;beanName:string;origin:string;process:string;roast:string;coffee:number;water:number;temp:number;ratio:number;grinder:string;grindSetting:string;grindSize:string;filter:string;brewTime:string;agitation:string;favorite:boolean;status:'Draft'|'Tested'|'Favorite';rating:number;notes:string;pours:Pour[];createdAt:string;parentId?:string};
 export type Bean={id:string;name:string;origin:string;process:string;roast:string;notes:string;roastedAt:string;stock:number};
-export type Brew={id:string;recipeId:string;recipeName:string;beanName:string;date:string;coffee:number;water:number;temp:number;actualTime:string;grindSetting:string;sweetness:number;acidity:number;bitterness:number;body:number;clarity:number;rating:number;notes:string};
+export type Brew={id:string;recipeId:string;recipeName:string;beanName:string;date:string;coffee:number;water:number;temp:number;actualTime:string;grindSetting:string;sweetness:number;acidity:number;bitterness:number;body:number;clarity:number;rating:number;notes:string;entryType?:'brew'|'note'};
 export type BrewData={recipes:Recipe[];beans:Bean[];brews:Brew[]};

@@ -16,7 +16,6 @@ Brew-Note is a neo-brutalist coffee brewing journal and recipe lab built with Ne
 - Full-screen Brew Mode with timer and current pour instruction
 - Brew Journal and star rating
 - Favorite recipes
-- Demo dataset and reset button
 
 ## Run locally
 
@@ -75,3 +74,10 @@ V1 stores data in the current browser/device only. This is perfect for the first
 - Recipe Edit, Open, and Brew are mutually exclusive flows.
 - Recipe editor/detail and Brew Mode now render as true fixed overlays instead of extending the page.
 - Bean cards expose a single Edit action.
+
+## V1.4 UX update
+- Mobile footer spacing tightened.
+- Footer credit: Created with coffee by Galang.
+- Journal supports recipe-linked notes and note detail popups.
+- Mobile bean editor stacking bug fixed.
+- Header branding updated to BREW-NOTE v1.1 with a larger coffee icon.
