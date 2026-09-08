@@ -479,3 +479,34 @@ body:has(.modal) .mobileDock{
     min-height:46px;
   }
 }
+
+
+/* V2.5 — choose actual beans before Brew Mode */
+.beanPickModal{max-width:680px !important}
+.selectedBeanPreview{
+  border:3px solid var(--ink);
+  background:var(--mint);
+  box-shadow:5px 5px 0 var(--ink);
+  padding:14px;
+  margin:14px 0;
+}
+.selectedBeanTitle{display:flex;align-items:center;gap:10px}
+.selectedBeanTitle span{display:flex;flex-direction:column}
+.selectedBeanPreview small{font-size:9px;font-weight:900}
+.selectedBeanFacts{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:7px;
+  margin-top:12px;
+}
+.selectedBeanFacts span{
+  background:white;
+  border:2px solid var(--ink);
+  padding:8px;
+  display:flex;
+  flex-direction:column;
+  text-align:center;
+}
+@media(max-width:650px){
+  .selectedBeanFacts{grid-template-columns:repeat(2,1fr)}
+}

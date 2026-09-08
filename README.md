@@ -141,3 +141,13 @@ V1 stores data in the current browser/device only. This is perfect for the first
 - The bottom mobile navigation is hidden while a modal is open.
 - Modal action buttons are sticky at the bottom on mobile.
 - Daily coffee dashboard now treats 45g as the 100% daily maximum and shows progress + remaining grams.
+
+## V2.5
+- Recipes are bean-agnostic by default.
+- Every Brew / Start Brew / Brew Again flow now asks which bean is being used first.
+- The chosen bean is attached to that actual brew log and used for stock deduction.
+- The bean picker previews origin, process, roast, roastery/type, and stock.
+
+## V2.6
+- Replaced the Indonesian helper text in the pre-brew bean picker with consistent English copy:
+  `Select the beans you're using for this brew. We'll use them to keep your Journal and bean stock up to date.`
