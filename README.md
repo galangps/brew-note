@@ -81,3 +81,10 @@ V1 stores data in the current browser/device only. This is perfect for the first
 - Journal supports recipe-linked notes and note detail popups.
 - Mobile bean editor stacking bug fixed.
 - Header branding updated to BREW-NOTE v1.1 with a larger coffee icon.
+
+## V1.5 UX update
+- Brew Mode now shows the upcoming brew steps below the current instruction.
+- Bean process and roast level use controlled dropdowns.
+- Recipe method, roast, and filter use controlled dropdowns; choosing a saved bean copies its origin/process/roast metadata.
+- Added a neo-brutalist coffee mascot artwork and matching coffee-cup favicon.
+- Footer is now a boxed neo-brutalist element.
