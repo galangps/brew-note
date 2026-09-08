@@ -129,3 +129,15 @@ V1 stores data in the current browser/device only. This is perfect for the first
 - Removed the compact Liquid / Ice / Ratio strip from recipe cards.
 - Removed Recent Recipes from the LAB dashboard for a cleaner landing page.
 - Footer credit changed to `Created with ☕ by gpsteam`.
+
+## V2.3
+- Journal entries can now be edited and deleted, including the date.
+- Target brew time uses minute/second up/down controls instead of manual text entry.
+- LAB dashboard shows total grams of coffee actually brewed today.
+- Journal notes are excluded from the daily coffee total; only real brew logs count.
+
+## V2.4
+- Fixed mobile Recipe Builder so Save/Cancel controls remain reachable.
+- The bottom mobile navigation is hidden while a modal is open.
+- Modal action buttons are sticky at the bottom on mobile.
+- Daily coffee dashboard now treats 45g as the 100% daily maximum and shows progress + remaining grams.

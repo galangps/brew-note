@@ -49,6 +49,8 @@ export default function Home(){
  useEffect(()=>{setData(loadData());setReady(true)},[]); useEffect(()=>{if(ready)saveData(data)},[data,ready]); useEffect(()=>{if(!brewStart)return;const i=setInterval(()=>setSeconds(Math.floor((Date.now()-brewStart)/1000)),250);return()=>clearInterval(i)},[brewStart]);
  const update=(d:BrewData)=>setData(d); const favorite=(r:Recipe)=>update({...data,recipes:data.recipes.map(x=>x.id===r.id?{...x,favorite:!x.favorite,status:!x.favorite?'Favorite':x.status==='Favorite'?'Tested':x.status}:x)});
  const filtered=useMemo(()=>data.recipes.filter(r=>(r.name+' '+r.method+' '+r.beanName).toLowerCase().includes(query.toLowerCase())),[data.recipes,query]);
+ const todayKey=(()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`})();
+ const coffeeToday=data.brews.filter(b=>b.entryType!=='note'&&b.date===todayKey).reduce((sum,b)=>sum+(Number(b.coffee)||0),0);
  const scaled=(r:Recipe,dose:number)=>{const factor=dose/r.coffee;return {...r,coffee:dose,water:Math.round(r.water*factor),pours:r.pours.map(p=>({...p,amount:Math.round(p.amount*factor)}))}};
  const saveRecipe=(r:Recipe)=>{const exists=data.recipes.some(x=>x.id===r.id);update({...data,recipes:exists?data.recipes.map(x=>x.id===r.id?r:x):[r,...data.recipes]});setEditing(null);setSelected(r);};
  const deleteRecipe=(id:string)=>{update({...data,recipes:data.recipes.filter(r=>r.id!==id)});setSelected(null)};
@@ -57,7 +59,7 @@ export default function Home(){
   <div className="brutalDecor" aria-hidden="true"><i className="geo geoSquare"></i><i className="geo geoCircle"></i><i className="geo geoTriangle"></i><i className="geo geoDots"></i><i className="geo geoCross"></i></div>
   <header className="topbar"><div className="brand" onClick={()=>setTab('dashboard')}><Coffee className="brandIcon" size={38}/><div><b>BREW-NOTE v1.1</b><small>RUN. TASTE. TWEAK. REPEAT.</small></div></div><nav>{[['dashboard','LAB'],['recipes','RECIPES'],['beans','BEANS'],['journal','JOURNAL']].map(([id,l])=><button className={tab===id?'active':''} onClick={()=>setTab(id)} key={id}>{l}</button>)}</nav><LofiPlayer/></header>
   {tab==='dashboard'&&<section><div className="hero heroWithRunner"><div className="heroCopy"><p className="kicker">PERSONAL COFFEE LAB</p><h1>GOOD COFFEE IS<br/>DEBUGGING WITH BEANS.</h1><p>Run the brew. Taste the output. Tweak the variables. Repeat.</p><button className="primary" onClick={()=>{setEditing(emptyRecipe());setTab('recipes')}}><Plus/> ADD RECIPE</button></div><div className="runnerArt"><span className="speechSticker">GOOD IDEAS<br/>START WITH<br/>COFFEE.</span><img src="/running-cup.svg" alt="Running white coffee cup mascot"/></div><div className="heroMenuCards"><button className="heroMenu recipesMenu" onClick={()=>setTab('recipes')}><BookOpen size={38}/><span><b>RECIPES</b><small>Organize your brewing recipes.</small></span><ChevronRight/></button><button className="heroMenu beansMenu" onClick={()=>setTab('beans')}><BeanIcon size={38}/><span><b>BEANS</b><small>Track your beans and stock.</small></span><ChevronRight/></button><button className="heroMenu journalMenu" onClick={()=>setTab('journal')}><FlaskConical size={38}/><span><b>JOURNAL</b><small>Log brews and tasting notes.</small></span><ChevronRight/></button></div></div>
-   <div className="stats"><Stat n={data.recipes.length} label="RECIPES" icon={<BookOpen/>}/><Stat n={data.brews.length} label="BREWS" icon={<FlaskConical/>}/><Stat n={data.beans.length} label="BEANS" icon={<BeanIcon/>}/><Stat n={data.recipes.filter(r=>r.favorite).length} label="FAVORITES" icon={<Heart/>}/></div>
+   <div className="stats"><DailyCoffeeStat grams={coffeeToday}/><Stat n={data.recipes.length} label="RECIPES" icon={<BookOpen/>}/><Stat n={data.brews.filter(b=>b.entryType!=='note').length} label="BREWS" icon={<FlaskConical/>}/><Stat n={data.beans.length} label="BEANS" icon={<BeanIcon/>}/><Stat n={data.recipes.filter(r=>r.favorite).length} label="FAVORITES" icon={<Heart/>}/></div>
    <div className="grid2"><div className="panel"><div className="panelHead"><h2>BREW AGAIN</h2><span>latest log</span></div>{data.brews[0]?<><h3>{data.brews[0].recipeName}</h3><p>{data.brews[0].beanName}</p><div className="miniSpecs"><b>{data.brews[0].coffee}g</b><b>{data.brews[0].water}g</b><b>{data.brews[0].temp}°C</b><b>★ {data.brews[0].rating}</b></div><button className="primary" onClick={()=>{const r=data.recipes.find(x=>x.id===data.brews[0].recipeId);if(r)setBrewMode(r)}}><Play/> BREW AGAIN</button></>:<p>No brew logs yet.</p>}</div>
    <div className="panel yellow"><div className="panelHead"><h2>BEAN INVENTORY</h2><span>what's left</span></div>{data.beans.slice(0,3).map(b=><div className="beanRow" key={b.id}><div><b>{b.name}</b><small>{b.origin} · {b.process}</small></div><strong>{b.stock}g</strong></div>)}</div></div>
    </section>}
@@ -125,7 +127,22 @@ function LofiPlayer(){
  </div>
 }
 
-function Stat({n,label,icon}:{n:number;label:string;icon:React.ReactNode}){return <div className="stat">{icon}<strong>{n}</strong><span>{label}</span></div>}
+function DailyCoffeeStat({grams}:{grams:number}){
+ const max=45;
+ const pct=Math.min(100,Math.max(0,(grams/max)*100));
+ const remaining=Math.max(0,max-grams);
+ return <div className="stat dailyCoffeeStat">
+   <Coffee/>
+   <strong>{grams}g</strong>
+   <span>COFFEE TODAY</span>
+   <div className="dailyProgress" aria-label={`${Math.round(pct)} percent of daily 45 gram limit`}>
+     <i style={{width:`${pct}%`}}></i>
+   </div>
+   <small>{Math.round(pct)}% of 45g · {remaining>0?`${remaining}g remaining`:`daily max reached`}</small>
+ </div>
+}
+
+function Stat({n,label,icon}:{n:number|string;label:string;icon:React.ReactNode}){return <div className="stat">{icon}<strong>{n}</strong><span>{label}</span></div>}
 function RecipeEditor({recipe,beans,onClose,onSave}:{recipe:Recipe;beans:Bean[];onClose:()=>void;onSave:(r:Recipe)=>void}){
  const normalize=(base:Recipe):Recipe=>({...base,pours:base.pours.map(p=>({...p,stepType:p.stepType||'water'}))});
  const [r,setR]=useState(normalize(recipe));
@@ -154,7 +171,7 @@ function RecipeEditor({recipe,beans,onClose,onSave}:{recipe:Recipe;beans:Bean[];
    <Field label="Grind setting"><input value={r.grindSetting} onChange={e=>set('grindSetting',e.target.value)} placeholder="13 clicks"/></Field>
    <Field label="Grind size"><input value={r.grindSize} onChange={e=>set('grindSize',e.target.value)}/></Field>
    <Field label="Filter / Dripper"><select value={r.filter} onChange={e=>set('filter',e.target.value)}>{!filters.includes(r.filter)&&r.filter&&<option>{r.filter}</option>}{filters.map(x=><option key={x}>{x}</option>)}</select></Field>
-   <Field label="Target brew time"><input value={r.brewTime} onChange={e=>set('brewTime',e.target.value)} placeholder="02:45"/></Field>
+   <Field label="Target brew time"><BrewTimeInput value={r.brewTime} onChange={v=>set('brewTime',v)}/></Field>
    <Field label="Agitation"><input value={r.agitation} onChange={e=>set('agitation',e.target.value)}/></Field>
   </div>
 
@@ -196,6 +213,28 @@ function RecipeEditor({recipe,beans,onClose,onSave}:{recipe:Recipe;beans:Bean[];
   <div className="modalActions"><button className="secondary" onClick={onClose}>CANCEL</button><button className="primary" onClick={()=>onSave(r)} disabled={!r.name}><Save/> SAVE RECIPE</button></div>
  </div></div>
 }
+function BrewTimeInput({value,onChange}:{value:string;onChange:(value:string)=>void}){
+ const parts=(value||'00:00').split(':').map(Number);
+ const mins=Number.isFinite(parts[0])?Math.max(0,parts[0]):0;
+ const secs=Number.isFinite(parts[1])?Math.min(59,Math.max(0,parts[1])):0;
+ const emit=(m:number,s:number)=>onChange(`${String(Math.max(0,m)).padStart(2,'0')}:${String(Math.min(59,Math.max(0,s))).padStart(2,'0')}`);
+ return <div className="brewTimeInput">
+   <div className="timeUnit">
+     <button type="button" onClick={()=>emit(mins+1,secs)} aria-label="Increase minutes">▲</button>
+     <strong>{String(mins).padStart(2,'0')}</strong>
+     <small>MIN</small>
+     <button type="button" onClick={()=>emit(Math.max(0,mins-1),secs)} aria-label="Decrease minutes">▼</button>
+   </div>
+   <b>:</b>
+   <div className="timeUnit">
+     <button type="button" onClick={()=>emit(mins,secs===59?0:secs+1)} aria-label="Increase seconds">▲</button>
+     <strong>{String(secs).padStart(2,'0')}</strong>
+     <small>SEC</small>
+     <button type="button" onClick={()=>emit(mins,secs===0?59:secs-1)} aria-label="Decrease seconds">▼</button>
+   </div>
+ </div>
+}
+
 function Field({label,children}:{label:string;children:React.ReactNode}){return <label className="field"><span>{label}</span>{children}</label>}
 function RecipeDetail({recipe,scaled,dose,setDose,onClose,onEdit,onDelete,onBrew,onSaveVariant}:{recipe:Recipe;scaled:Recipe;dose:number;setDose:(n:number)=>void;onClose:()=>void;onEdit:()=>void;onDelete:()=>void;onBrew:()=>void;onSaveVariant:()=>void}){
  return <div className="modal"><div className="modalBox">
@@ -265,12 +304,84 @@ function Beans({data,update}:{data:BrewData;update:(d:BrewData)=>void}){
  </section>
 }
 function Journal({data,update}:{data:BrewData;update:(d:BrewData)=>void}){
- const [form,setForm]=useState<Brew|null>(null); const [selected,setSelected]=useState<Brew|null>(null);
- const newNote=()=>{const r=data.recipes[0];setForm({id:uid(),recipeId:r?.id||'',recipeName:r?.name||'',beanName:r?.beanName||'',date:new Date().toISOString().slice(0,10),coffee:r?.coffee||0,water:r?.water||0,temp:r?.temp||0,actualTime:'—',grindSetting:r?.grindSetting||'',sweetness:5,acidity:5,bitterness:5,body:5,clarity:5,rating:5,notes:'',entryType:'note'})};
- const chooseRecipe=(id:string)=>{const r=data.recipes.find(x=>x.id===id);if(!form||!r)return;setForm({...form,recipeId:r.id,recipeName:r.name,beanName:r.beanName,coffee:r.coffee,water:r.water,temp:r.temp,grindSetting:r.grindSetting})};
- const saveNote=()=>{if(!form?.recipeId||!form.notes.trim())return;update({...data,brews:[form,...data.brews]});setForm(null)};
- return <section><div className="sectionTitle"><div><p className="kicker">ACTUAL BREWS + NOTES</p><h1>BREW JOURNAL.</h1></div><button className="primary" onClick={newNote} disabled={!data.recipes.length}><Plus/> ADD NOTE</button></div>{!data.recipes.length&&<p className="note">Create a recipe first, then attach journal notes to it.</p>}<div className="journal">{data.brews.map(b=><button className="journalRow journalButton" key={b.id} onClick={()=>setSelected(b)}><div className="dateBox"><b>{b.date.slice(8)}</b><span>{b.date.slice(5,7)}/{b.date.slice(2,4)}</span></div><div className="journalCopy"><div className="journalMeta"><span className="tag">{b.entryType==='note'?'NOTE':'BREW'}</span><h3>{b.recipeName}</h3></div><p>{b.beanName||'No bean'} · {b.coffee}g/{b.water}g · {b.temp}°C {b.actualTime&&b.actualTime!=='—'?`· ${b.actualTime}`:''}</p><small>{b.notes||'No note yet.'}</small></div><strong className="rating">{'★'.repeat(b.rating)}{'☆'.repeat(5-b.rating)}</strong></button>)}</div>
- {form&&<div className="modal"><div className="modalBox"><div className="modalHead"><div><p className="kicker">JOURNAL NOTE</p><h2>ADD BREW NOTE</h2></div><button className="iconBtn" onClick={()=>setForm(null)}><X/></button></div><Field label="RECIPE"><select value={form.recipeId} onChange={e=>chooseRecipe(e.target.value)}><option value="">Choose recipe</option>{data.recipes.map(r=><option value={r.id} key={r.id}>{r.name} · {r.method}</option>)}</select></Field><div className="formGrid"><Field label="DATE"><input type="date" value={form.date} onChange={e=>setForm({...form,date:e.target.value})}/></Field><Field label="RATING"><select value={form.rating} onChange={e=>setForm({...form,rating:+e.target.value})}>{[1,2,3,4,5].map(n=><option key={n} value={n}>{n} star{n>1?'s':''}</option>)}</select></Field></div><Field label="NOTE / COMMENT"><textarea rows={7} placeholder="What did you taste? What changed? What would you tweak next?" value={form.notes} onChange={e=>setForm({...form,notes:e.target.value})}/></Field><div className="note recipeSnapshot"><b>{form.recipeName||'No recipe selected'}</b><span>{form.beanName||'No bean'} · {form.coffee}g/{form.water}g · {form.temp}°C</span></div><div className="modalActions"><button className="secondary" onClick={()=>setForm(null)}>CANCEL</button><button className="primary" onClick={saveNote} disabled={!form.recipeId||!form.notes.trim()}><Save/> SAVE NOTE</button></div></div></div>}
- {selected&&<div className="modal"><div className="modalBox"><div className="modalHead"><div><span className="tag">{selected.entryType==='note'?'JOURNAL NOTE':'BREW LOG'}</span><h2>{selected.recipeName}</h2><p>{selected.date}</p></div><button className="iconBtn" onClick={()=>setSelected(null)}><X/></button></div><div className="specGrid big"><span><b>{selected.coffee}g</b> coffee</span><span><b>{selected.water}g</b> water</span><span><b>{selected.temp}°C</b> temp</span><span><b>{selected.grindSetting||'—'}</b> grind</span><span><b>{selected.actualTime||'—'}</b> time</span><span><b>{'★'.repeat(selected.rating)}</b> rating</span></div><h3 className="subhead">NOTE</h3><p className="journalNoteFull">{selected.notes||'No note was saved for this brew.'}</p><div className="modalActions"><button className="secondary" onClick={()=>setSelected(null)}>CLOSE</button></div></div></div>}
+ const [form,setForm]=useState<Brew|null>(null);
+ const [selected,setSelected]=useState<Brew|null>(null);
+ const isEditing=!!form&&data.brews.some(b=>b.id===form.id);
+
+ const newNote=()=>{
+   const r=data.recipes[0];
+   setForm({id:uid(),recipeId:r?.id||'',recipeName:r?.name||'',beanName:r?.beanName||'',date:new Date().toISOString().slice(0,10),coffee:r?.coffee||0,water:r?.water||0,temp:r?.temp||0,actualTime:'—',grindSetting:r?.grindSetting||'',sweetness:5,acidity:5,bitterness:5,body:5,clarity:5,rating:5,notes:'',entryType:'note'})
+ };
+
+ const chooseRecipe=(id:string)=>{
+   const r=data.recipes.find(x=>x.id===id);
+   if(!form||!r)return;
+   setForm({...form,recipeId:r.id,recipeName:r.name,beanName:r.beanName,coffee:r.coffee,water:r.water,temp:r.temp,grindSetting:r.grindSetting})
+ };
+
+ const saveEntry=()=>{
+   if(!form?.recipeId)return;
+   const exists=data.brews.some(b=>b.id===form.id);
+   update({...data,brews:exists?data.brews.map(b=>b.id===form.id?form:b):[form,...data.brews]});
+   setForm(null);
+ };
+
+ const editEntry=(entry:Brew)=>{setSelected(null);setForm({...entry})};
+
+ const deleteEntry=(id:string)=>{
+   if(!window.confirm('Delete this journal entry?'))return;
+   update({...data,brews:data.brews.filter(b=>b.id!==id)});
+   setSelected(null);
+   setForm(null);
+ };
+
+ return <section>
+  <div className="sectionTitle">
+   <div><p className="kicker">ACTUAL BREWS + NOTES</p><h1>BREW JOURNAL.</h1></div>
+   <button className="primary" onClick={newNote} disabled={!data.recipes.length}><Plus/> ADD NOTE</button>
+  </div>
+
+  {!data.recipes.length&&<p className="note">Create a recipe first, then attach journal notes to it.</p>}
+
+  <div className="journal">
+   {data.brews.map(b=><div className="journalRow" key={b.id}>
+    <button className="journalOpenArea" onClick={()=>setSelected(b)}>
+     <div className="dateBox"><b>{b.date.slice(8)}</b><span>{b.date.slice(5,7)}/{b.date.slice(2,4)}</span></div>
+     <div className="journalCopy"><div className="journalMeta"><span className="tag">{b.entryType==='note'?'NOTE':'BREW'}</span><h3>{b.recipeName}</h3></div><p>{b.beanName||'No bean'} · {b.coffee}g/{b.water}g · {b.temp}°C {b.actualTime&&b.actualTime!=='—'?`· ${b.actualTime}`:''}</p><small>{b.notes||'No note yet.'}</small></div>
+     <strong className="rating">{'★'.repeat(b.rating)}{'☆'.repeat(5-b.rating)}</strong>
+    </button>
+    <div className="journalActions">
+      <button onClick={()=>editEntry(b)}><Pencil size={16}/> EDIT</button>
+      <button className="danger" onClick={()=>deleteEntry(b.id)}><Trash2 size={16}/> DELETE</button>
+    </div>
+   </div>)}
+  </div>
+
+  {form&&<div className="modal"><div className="modalBox">
+   <div className="modalHead"><div><p className="kicker">{form.entryType==='note'?'JOURNAL NOTE':'BREW LOG'}</p><h2>{isEditing?'EDIT JOURNAL ENTRY':'ADD BREW NOTE'}</h2></div><button className="iconBtn" onClick={()=>setForm(null)}><X/></button></div>
+   <Field label="RECIPE"><select value={form.recipeId} onChange={e=>chooseRecipe(e.target.value)}><option value="">Choose recipe</option>{data.recipes.map(r=><option value={r.id} key={r.id}>{r.name} · {r.method}</option>)}</select></Field>
+   <div className="formGrid">
+    <Field label="DATE"><input type="date" value={form.date} onChange={e=>setForm({...form,date:e.target.value})}/></Field>
+    <Field label="RATING"><select value={form.rating} onChange={e=>setForm({...form,rating:+e.target.value})}>{[1,2,3,4,5].map(n=><option key={n} value={n}>{n} star{n>1?'s':''}</option>)}</select></Field>
+   </div>
+   <Field label="NOTE / COMMENT"><textarea rows={7} placeholder="What did you taste? What changed? What would you tweak next?" value={form.notes} onChange={e=>setForm({...form,notes:e.target.value})}/></Field>
+   <div className="note recipeSnapshot"><b>{form.recipeName||'No recipe selected'}</b><span>{form.beanName||'No bean'} · {form.coffee}g/{form.water}g · {form.temp}°C</span></div>
+   <div className="modalActions">
+    {isEditing&&<button className="danger" onClick={()=>deleteEntry(form.id)}><Trash2/> DELETE</button>}
+    <button className="secondary" onClick={()=>setForm(null)}>CANCEL</button>
+    <button className="primary" onClick={saveEntry} disabled={!form.recipeId}><Save/> {isEditing?'UPDATE ENTRY':'SAVE NOTE'}</button>
+   </div>
+  </div></div>}
+
+  {selected&&<div className="modal"><div className="modalBox">
+   <div className="modalHead"><div><span className="tag">{selected.entryType==='note'?'JOURNAL NOTE':'BREW LOG'}</span><h2>{selected.recipeName}</h2><p>{selected.date}</p></div><button className="iconBtn" onClick={()=>setSelected(null)}><X/></button></div>
+   <div className="specGrid big"><span><b>{selected.coffee}g</b> coffee</span><span><b>{selected.water}g</b> water</span><span><b>{selected.temp}°C</b> temp</span><span><b>{selected.grindSetting||'—'}</b> grind</span><span><b>{selected.actualTime||'—'}</b> time</span><span><b>{'★'.repeat(selected.rating)}</b> rating</span></div>
+   <h3 className="subhead">NOTE</h3><p className="journalNoteFull">{selected.notes||'No note was saved for this brew.'}</p>
+   <div className="modalActions">
+    <button className="danger" onClick={()=>deleteEntry(selected.id)}><Trash2/> DELETE</button>
+    <button className="secondary" onClick={()=>editEntry(selected)}><Pencil/> EDIT</button>
+    <button className="secondary" onClick={()=>setSelected(null)}>CLOSE</button>
+   </div>
+  </div></div>}
  </section>
 }
